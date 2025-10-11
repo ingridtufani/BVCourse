@@ -1,16 +1,32 @@
-# React + Vite
+# Bow Course Registration System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de registro de cursos desenvolvido em React para o departamento de Software Development.
 
-Currently, two official plugins are available:
+## 🚀 Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Visualização de programas e cursos
+- Interface responsiva
+- Navegação entre páginas
+- Design moderno com CSS customizado
 
-## React Compiler
+## 🛠️ Tecnologias
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 18
+- React Router DOM
+- Vite
+- CSS3
 
-## Expanding the ESLint configuration
+## 📦 Instalação
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/bow-registration-system.git
+
+# Entre na pasta
+cd bow-registration-system
+
+# Instale as dependências
+npm install
+
+# Execute o projeto
+npm run dev
