@@ -1,31 +1,28 @@
-import React , {useState} from "react";
+import React , { useState} from "react";
+import { useNavigate } from "react-router-dom";
 import '../styles/Signup.css';
 
 
+//This will be replaced with data from backend later
+import { programData } from "../data/demoData";
+
+
+// dropdown options
+const PROGRAMS = [
+    { value: "", label: "Select..." },
+    ...programData.map((prog) => ({
+        value: prog.code, //save the code
+        label: `${prog.code} - ${prog.name}`, //show code and name
+    })),
+];
 
 const DEPARTMENTS = [
-    "Computer Science",
-    "Information Technology",
-    "Software Engineering",
-    "Cyber Security",
+     { value: "", label: "Select..." },
+     ...Array.from(new Set(programData.map((prog) => prog.department))).map((dept) => ({
+        value: dept,
+        label: dept,
+        })),
 ];
-
-const PROGRAMS = [
-    "Select...",
-    "SODV1210 - Web Development",
-    "SODV1211 - Mobile App Development",
-    "SODV1212 - Backend Development",
-    "SODV1213 - Frontend Development",
-    "SODV1214 - Full Stack Development",
-    "SODV1215 - Database Management",
-    "SODV1216 - Cloud Computing",
-    "SODV1217 - DevOps",
-    "SODV1218 - Cyber Security",
-    "SODV1219 - Software Testing",
-    "SODV1220 - Agile Methodologies",
-    "SODV1221 - Project Management",
-];
-
 
 const initialForm = {
     firstName: "",
@@ -43,10 +40,16 @@ const initialForm = {
 export default function Signup() {
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
+    const [usernameError, setUsernameError] = useState("");
+    const navigate = useNavigate();
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm((f) => ({ ...f, [name]: value }));
+
+        //clear specific field error on change
+        if (name === "username") setUsernameError("");
     };
 
     const validate = () => {
@@ -90,13 +93,52 @@ export default function Signup() {
         e.preventDefault();
         if (!validate()) return;
 
-        //submit the form
-            console.log("Submitting signup Form", form);
-        //clean it
-            alert("Signup successful!");
-            setForm(initialForm);
-            setErrors({});
-    };
+
+        //get users from local storage
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    //check if username already exists
+    const exists = users.some(
+            (u) => u.username.trim().toLowerCase() === form.username.trim().toLowerCase()
+        
+        );
+        if (exists) {
+            setUsernameError("Username already taken");
+            setErrors((err) => ({ ...err, username: " Username already taken" }));
+            return;
+        }
+
+    const newUser = { 
+        id: 
+            typeof crypto !== 'undefined' && crypto.randomUUID
+             ? crypto.randomUUID() 
+             : Date.now().toString(),
+        username: form.username.trim().toLowerCase(),
+        password: form.password,
+        role: "student",
+           profile: {
+                firstName: form.firstName.trim(),
+                lastName: form.lastName.trim(),
+                email: form.email.trim(),
+                phone: form.phone.trim(),
+                birthday: form.birthday.trim(),
+                department: form.department.trim(),
+                program: form.program.trim(),
+            },
+        };
+
+    
+    const updatedUSers = [...users, newUser];
+    localStorage.setItem("users", JSON.stringify(updatedUSers));
+
+
+    alert("Signup successful! Please log in.");
+    setForm(initialForm);
+    setErrors({});
+    setUsernameError("");
+    navigate("/login"); //redirect to login page
+};
+ 
 
     return (
         <div className="signup-container">
@@ -116,6 +158,7 @@ export default function Signup() {
                                 />
                             {errors.firstName && <small className="error">{errors.firstName}</small>}
                         </div>
+
                 <div className="field">
                     <label htmlFor="lastName">Last Name</label>
                     <input
@@ -175,32 +218,36 @@ export default function Signup() {
                         value={form.department}
                         onChange={handleChange}
                     >
-                        {DEPARTMENTS.map((dept) => (
-                            <option key={dept} value={dept}>
-                                {dept}
-                            </option>
-                        ))}
+                     {DEPARTMENTS.map((opt) => (
+                  <option key={opt.value || "blank"} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
                     </select>
-                    {errors.department && <small className="error">{errors.department}</small>}
+                    {errors.department &&  (
+                        <small className="error">{errors.department}</small>
+                    )}
                 </div>
 
-                <div className="field">
-                    <label htmlFor="program">Program</label>
-                    <select
-                        id="program"
-                        name="program"
-                        value={form.program}
-                        onChange={handleChange}
-                    >
-                        {PROGRAMS.map((prog) => (
-                            <option key={prog} value={prog}>
-                                {prog}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.program && <small className="error">{errors.program}</small>}
-                </div>
+             <div className="field">
+              <label htmlFor="program">Program</label>
+              <select
+                id="program"
+                name="program"
+                value={form.program}
+                onChange={handleChange}
+              >
+                {PROGRAMS.map((opt) => (
+                  <option key={opt.value || "blank"} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              {errors.program && (
+                <small className="error">{errors.program}</small>
+              )}
             </div>
+          </div>
 
             <div className="row">
                 <div className="field">
@@ -212,7 +259,9 @@ export default function Signup() {
                         value={form.username}
                         onChange={handleChange}
                     />
-                    {errors.username && <small className="error">{errors.username}</small>}
+
+                    {(errors.username || usernameError) &&                  
+                    ( <small className="error">{errors.username}</small>)}
                 </div>
             </div>
 
