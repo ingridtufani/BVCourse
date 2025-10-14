@@ -1,0 +1,254 @@
+/* Layout Principal da Página */
+.admin-page-layout {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: white; /* Cor de fundo da página */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Títulos de Seção */
+.dashboard-section h2 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+/* Divisor horizontal */
+.divider {
+    border: none;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 30px 0;
+}
+
+/* GRID para Manage Courses */
+.course-grid {
+    display: grid;
+    /* 3 colunas, ajustando automaticamente */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 20px;
+    margin-top: 15px;
+}
+
+/* Layout do Formulário (Course Creator) */
+.course-creator-form .form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.course-creator-form label {
+    flex: 1; /* Distribui o espaço igualmente */
+    display: block;
+    font-weight: 500;
+    color: #555;
+}
+
+.course-creator-form input, 
+.course-creator-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.create-course-button {
+    /* Estilos do botão azul (similar ao do login) */
+    background-color: #5c6bc0;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+
+/* --- Estilos para o Componente AdminHeader --- */
+
+/* Contêiner principal para o ícone/título e as informações */
+.admin-header-area {
+    /* Usa Flexbox para organizar o conteúdo em duas linhas principais (título e info) */
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 20px;
+}
+
+/* Estilo para a linha do ícone e título "ADMIN DASHBOARD" */
+.admin-icon-title {
+    display: flex;
+    align-items: center; /* Alinha o texto e o ícone verticalmente */
+    margin-bottom: 30px;
+}
+
+/* Estilo do ícone/placeholder (para alinhar com o design) */
+.admin-icon-title .icon-placeholder {
+    /* Simula o ícone azul da imagem */
+    font-size: 2rem;
+    color: #5555ff; 
+    margin-right: 10px;
+}
+
+/* Estilo do texto "ADMIN DASHBOARD" */
+.admin-title-text {
+    font-size: 1.8rem;
+    color: #5555ff; 
+    font-weight: 600;
+}
+
+/* Contêiner para os campos de informação (ADMIN NAME e STATUS) */
+.admin-info-fields {
+    display: flex;
+    gap: 40px; /* Espaçamento entre os dois blocos (Name e Status) */
+    width: 100%;
+}
+
+/* Estilo de cada campo (Admin Name ou Status) */
+.info-field {
+    /* Define a estrutura vertical: Label em cima, Valor em baixo */
+    flex: 1; /* Ocupa metade do espaço disponível */
+}
+
+.info-field label {
+    font-size: 0.9rem;
+    color: #777;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Estilo da caixa de valor (fundo claro) */
+.info-value {
+    background-color: #f7f7ff; /* Cor de fundo bem clara (quase branco/azul) */
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    color: #333; /* Cor do texto */
+    min-height: 40px; /* Garante altura mínima para os campos */
+    display: flex; /* Para centralizar o texto verticalmente se necessário */
+    align-items: center; 
+}
+
+/* Cor específica para o Status (se precisar de uma cor diferente) */
+.status-value {
+    color: #5555ff; /* O texto ADMINISTRATOR parece mais azul na imagem */
+}
+/* Adicione estilos para StudentList, ContactMessages e o Card individual do Curso */
+/* para completar o visual da imagem. */
+
+/* --- 1. Estilo para o Contêiner CourseManagement (O Grid) --- */
+
+/* Aplica o Grid para o contêiner de todos os cartões */
+.course-grid {
+    display: grid;
+    /* Define 3 colunas de largura igual. O 'gap' cria o espaço entre elas. */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px; 
+    margin-top: 20px;
+}
+
+/* Se a tela for menor, ajusta para 2 colunas */
+@media (max-width: 1000px) {
+    .course-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Se for muito pequena, volta para 1 coluna */
+@media (max-width: 600px) {
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* --- 2. Estilo para o Cartão Individual do Curso (CourseCard) --- */
+
+.course-card {
+    /* O Card já tem o fundo branco e a sombra do componente Card, mas garantimos o Flexbox para o conteúdo interno */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid #e0e0ff; /* Borda sutilmente azulada/roxa */
+    border-radius: 12px;
+}
+
+/* Título e Ícone do Curso */
+.course-card h3 {
+    font-size: 1.1rem;
+    color: #5555ff; /* Cor azul primary */
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.course-card .course-icon {
+    /* Estilo do ícone/placeholder do livro */
+    font-size: 1.5rem;
+    color: #5555ff;
+    margin-bottom: 10px;
+}
+
+/* Linhas de Placeholder (as linhas cinzas na imagem) */
+.course-card::before, 
+.course-card::after {
+    content: '';
+    display: block;
+    height: 10px;
+    background-color: #f0f0ff; /* Fundo mais claro que o card */
+    border-radius: 4px;
+    margin-bottom: 8px;
+    /* As linhas de baixo são menores */
+    width: 90%; 
+}
+.course-card::after {
+    width: 70%; 
+}
+
+/* --- 3. Estilo para Ações (Edit e Delete) --- */
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto; /* Empurra as ações para o fundo do cartão */
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Estilo Base dos Botões de Ação */
+.action-button {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+/* Botão EDIT (Cor azul sutil) */
+.edit-button {
+    color: #5555ff;
+    background-color: white;
+    border-color: #5555ff;
+}
+.edit-button:hover {
+    background-color: #f0f0ff;
+}
+
+/* Botão DELETE (Cor vermelha sutil) */
+.delete-button {
+    color: #d9534f; /* Tom de vermelho */
+    background-color: white;
+    border-color: #d9534f;
+}
+.delete-button:hover {
+    background-color: #ffe0e0;
+}
