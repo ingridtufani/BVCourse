@@ -61,6 +61,21 @@ body {
   font-family: inherit;
 }
 
+.submit-button {
+  width: 100%;
+  align-items: center;
+  padding: 0.9rem;
+  background-color: #ffffff;
+  color: var(--primary-color);
+  border: none;
+  border-radius: 20px;
+  box-shadow:  0 4px 20px 0 rgba(0, 0, 0, 0.15);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -280,4 +295,57 @@ footer {
   text-align: center;
   border-top: 1px solid var(--border-color);
   margin-top: auto;
+}
+
+/*Form*/
+.form{ width: 100%;}
+
+.form-row 
+{display: flex; 
+  gap: 20px;
+}
+
+.form-row > .form-field {
+  flex: 1;
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+}
+.form-label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.input,
+.select {
+    background-color: var(--bg-white);
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--text-light);
+    transition: border-color 0.3s ease;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.input.is-error,
+.select.is-error {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.08);
+}
+
+.form-error{
+  color: var(--error-color);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
 }
