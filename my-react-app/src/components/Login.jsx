@@ -36,11 +36,7 @@ function LoginForm() {
             localStorage.setItem('userRole', loggedUser.role);
             localStorage.setItem('isLoggedIn', 'true');
             
-<<<<<<< HEAD
             navigate(loggedUser.role === 'student' ? '/studentDashboard' : '/adminDashboard');
-=======
-            navigate(loggedUser.role === 'student' ? '/student/dashboard' : '/admin/dashboard');
->>>>>>> 0686003 (Modified Files:)
         } else {
             setError('Invalid credentials');
         }

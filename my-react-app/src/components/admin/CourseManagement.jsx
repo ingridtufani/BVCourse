@@ -1,5 +1,3 @@
-// src/components/Admin/CourseManagement.jsx
-
 import React from 'react';
 import CourseCard from './CourseCard';
 

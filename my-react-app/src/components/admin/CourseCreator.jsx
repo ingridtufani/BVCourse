@@ -1,5 +1,3 @@
-// src/components/Admin/CourseCreator.jsx
-
 import React, { useState } from 'react';
 
 const CourseCreator = ({ onCreate }) => {
@@ -15,7 +13,6 @@ const CourseCreator = ({ onCreate }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onCreate(formData);
-        // Resetar o formulário
         setFormData({ courseName: '', term: '', startDate: '', endDate: '', description: '' });
     };
 

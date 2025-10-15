@@ -1,5 +1,3 @@
-// src/components/Admin/ContactMessages.jsx
-
 import React from 'react';
 
 const ContactMessages = ({ messages }) => (

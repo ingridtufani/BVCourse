@@ -1,5 +1,3 @@
-// src/components/Admin/StudentList.jsx
-
 import React from 'react';
 
 const StudentList = ({ students }) => (

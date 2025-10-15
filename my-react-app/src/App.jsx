@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Signup from "./components/Signup";
 import Profile from "./components/Profile";
 import StudentDashboard from "./components/StudentDashboard";
+import AdminDashboard from "./components/AdminDashboard";
 
 export default function App() {
   return (
@@ -18,9 +19,9 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/studentdashboard" element={<StudentDashboard />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/adminDashboard" element={<AdminsDashboard/>}/>
+            <Route path="/studentDashboard" element={<StudentDashboard />} />
+            <Route path="/adminDashboard" element={<AdminDashboard/>}/>
           </Routes>
         </main>
         <footer>

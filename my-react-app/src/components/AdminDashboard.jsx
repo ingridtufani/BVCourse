@@ -9,16 +9,14 @@ import CourseCreator from './admin/CourseCreator';
 import StudentList from './admin/StudentList';
 import ContactMessages from './admin/ContactMessages';
 
-import '../styles/AdminDashboard.css'; // Estilos específicos
+import '../styles/AdminDashboard.css'; 
 
 function AdminDashboard() {
-    // 1. Estados Centrais
     const [courses, setCourses] = useState(initialCourses);
     const [students] = useState(initialStudents);
     const [messages] = useState(initialMessages);
     const navigate = useNavigate();
 
-    // 2. Lógica de Criação de Curso (passada para CourseCreator)
     const handleCreateCourse = useCallback((newCourseData) => {
         const newId = courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1;
         setCourses(prevCourses => [
@@ -27,11 +25,10 @@ function AdminDashboard() {
         ]);
     }, [courses]);
 
-    // 3. Lógica de Logout
     const handleLogout = () => {
         localStorage.removeItem('userRole');
         localStorage.removeItem('isLoggedIn');
-        navigate('/'); 
+        navigate('/login'); 
     };
 
     return (
