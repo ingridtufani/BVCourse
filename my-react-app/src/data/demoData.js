@@ -63,3 +63,25 @@ export const courseData = [
     description: "Learn testing methodologies and best practices in software quality assurance."
   }
 ];
+
+
+export const MOCK_USERS = [
+    { username: 'aluno123', password: '123', role: 'student', id: 1 },
+    { username: 'admin456', password: '456', role: 'admin', id: 2 },
+];
+
+export const initialCourses = [
+    { id: 1, title: 'Database Design & SQL' },
+    { id: 2, title: 'Web Development Essentials' },
+    { id: 3, title: 'Introduction Programming' },
+    { id: 4, title: 'Software Testing Q&A' },
+    { id: 5, title: 'Advanced JavaScript' },
+];
+
+export const initialStudents = [
+    { id: '1234', name: 'Bruno', program: 'SD-DIP', email: 'bruno@gmail.com', status: 'Active' },
+];
+
+export const initialMessages = [
+    { id: 1, sender: 'Bruno', program: 'SD-DIP', subject: 'Error', date: '2025-10-10' },
+];
