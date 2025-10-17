@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Signup.css";
 import Input from "./ui/Input";
@@ -36,11 +36,55 @@ const initialForm = {
   password: "",
 };
 
+//creating Student ID
+const getUsers = () => JSON.parse(localStorage.getItem("users") || "[]");
+
+const pad4 = (n) => String(n).padStart(4, "0");
+
+const buildIdPrefix = (programCode, year) =>
+  `BVC-${year}-${(programCode || "GEN")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")}`;
+
+const nextSequenceFor = (users, prefix) => {
+  let maxSeq = 0;
+
+  users.forEach((u) => {
+    const id = u?.profile?.studentId || "";
+    if (id.startsWith(prefix + "-")) {
+      const tail = id.split("-").pop();
+      const num = parseInt(tail, 10);
+      if (!Number.isNaN(num)) maxSeq = Math.max(maxSeq, num);
+    }
+  });
+  return maxSeq + 1;
+};
+
+const generateStudentId = (programCode) => {
+  const year = new Date().getFullYear();
+  const prefix = buildIdPrefix(programCode, year);
+  const users = getUsers();
+  const seq = nextSequenceFor(users, prefix);
+  return `${prefix}-${pad4(seq)}`;
+};
+
+// -----------------------------------
+
 export default function Signup() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [usernameError, setUsernameError] = useState("");
+  const [studentId, setStudentId] = useState("");
   const navigate = useNavigate();
+
+  //student id generated
+  useEffect(() => {
+    if (form.program) {
+      setStudentId(generateStudentId(form.program));
+    } else {
+      setStudentId("");
+    }
+  }, [form.program]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,6 +119,9 @@ export default function Signup() {
     else if (form.password.length < 6)
       e.password = " Password must be at least 6 characters long";
 
+    //it will depend on the program to generate the Student Id here
+    if (!studentId) e.studentId = "Choose a Program";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -97,6 +144,8 @@ export default function Signup() {
       return;
     }
 
+    const finalStudentId = generateStudentId(form.program);
+
     const newUser = {
       id:
         typeof crypto !== "undefined" && crypto.randomUUID
@@ -106,6 +155,7 @@ export default function Signup() {
       password: form.password,
       role: "student",
       profile: {
+        studentId: finalStudentId,
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
@@ -116,8 +166,8 @@ export default function Signup() {
       },
     };
 
-    const updatedUSers = [...users, newUser];
-    localStorage.setItem("users", JSON.stringify(updatedUSers));
+    const updatedUsers = [...users, newUser];
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
 
     alert("Signup successful! Please log in.");
     setForm(initialForm);
@@ -201,6 +251,16 @@ export default function Signup() {
               options={PROGRAMS}
             />
           </div>
+
+          <Input
+            id="studentId"
+            name="studentId"
+            label="Student ID"
+            value={studentId}
+            readOnly
+            placeholder=" "
+            error={errors.studentId}
+          />
 
           <Input
             id="username"
