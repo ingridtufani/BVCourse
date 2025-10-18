@@ -46,9 +46,12 @@ const buildIdPrefix = (programCode, year) =>
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "")}`;
 
-const nextSequenceFor = (users, prefix) => {
-  let maxSeq = 0;
+const computeNextSeqForPrefix = (programCode) => {
+  const year = new Date().getFullYear();
+  const prefix = buildIdPrefix(programCode, year);
+  const users = getUsers();
 
+  let maxSeq = 0;
   users.forEach((u) => {
     const id = u?.profile?.studentId || "";
     if (id.startsWith(prefix + "-")) {
@@ -57,16 +60,22 @@ const nextSequenceFor = (users, prefix) => {
       if (!Number.isNaN(num)) maxSeq = Math.max(maxSeq, num);
     }
   });
-  return maxSeq + 1;
+
+  return { prefix, next: maxSeq + 1 };
 };
 
-const generateStudentId = (programCode) => {
-  const year = new Date().getFullYear();
-  const prefix = buildIdPrefix(programCode, year);
-  const users = getUsers();
-  const seq = nextSequenceFor(users, prefix);
-  return `${prefix}-${pad4(seq)}`;
+const previewStudentId = (programCode) => {
+  const { prefix, next } = computeNextSeqForPrefix(programCode);
+  return `${prefix}-${pad4(next)}`;
 };
+
+// const generateStudentId = (programCode) => {
+//   const year = new Date().getFullYear();
+//   const prefix = buildIdPrefix(programCode, year);
+//   const users = getUsers();
+//   const seq = nextSequenceFor(users, prefix);
+//   return `${prefix}-${pad4(seq)}`;
+// };
 
 // -----------------------------------
 
@@ -80,7 +89,7 @@ export default function Signup() {
   //student id generated
   useEffect(() => {
     if (form.program) {
-      setStudentId(generateStudentId(form.program));
+      setStudentId(previewStudentId(form.program));
     } else {
       setStudentId("");
     }
@@ -133,7 +142,6 @@ export default function Signup() {
     //get users from local storage
     const users = JSON.parse(localStorage.getItem("users") || "[]");
 
-    //check if username already exists
     const exists = users.some(
       (u) =>
         u.username.trim().toLowerCase() === form.username.trim().toLowerCase()
@@ -144,7 +152,19 @@ export default function Signup() {
       return;
     }
 
-    const finalStudentId = generateStudentId(form.program);
+    //calculating the ID for next prefix
+    const { prefix, next } = computeNextSeqForPrefix(form.program);
+
+    let seq = next;
+    let candidate = `${prefix}-${pad4(seq)}`;
+
+    //check if username already exists
+    while (users.some((u) => u?.profile?.studentId === candidate)) {
+      seq += 1;
+      candidate = `${prefix}-${pad4(seq)}`;
+    }
+
+    const finalStudentId = candidate;
 
     const newUser = {
       id:
@@ -169,6 +189,16 @@ export default function Signup() {
     const updatedUsers = [...users, newUser];
     localStorage.setItem("users", JSON.stringify(updatedUsers));
 
+    localStorage.setItem(
+      "bvc.profile",
+      JSON.stringify({
+        firstName: newUser.profile.firstName,
+        lastName: newUser.profile.lastName,
+        studentId: newUser.profile.studentId,
+        program: newUser.profile.program,
+        status: "STUDENT",
+      })
+    );
     alert("Signup successful! Please log in.");
     setForm(initialForm);
     setErrors({});
