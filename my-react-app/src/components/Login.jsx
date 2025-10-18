@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "./ui/Card";
 import "../styles/Login.css";
+import LogoutButton from "./ui/LogoutButton";
 
 // const MOCK_USERS = [
 //     { username: 'student', password: '123', role: 'student', id: 1 },
@@ -46,6 +47,17 @@ function LoginForm() {
         })
       );
 
+      localStorage.setItem(
+        "bvc.profile",
+        JSON.stringify({
+          firstName: "Administrator",
+          lastName: "",
+          studentId: "ADMIN",
+          program: "",
+          status: "ADMINISTRATOR",
+        })
+      );
+
       window.dispatchEvent(new Event("auth-changed"));
       navigate("/adminDashboard");
       return;
@@ -67,6 +79,17 @@ function LoginForm() {
           role: loggedUser.role,
           username: loggedUser.username,
           profile: loggedUser.profile,
+        })
+      );
+
+      localStorage.setItem(
+        "bvc.profile",
+        JSON.stringify({
+          firstName: loggedUser.profile.firstName || "",
+          lastName: loggedUser.profile.lastName || "",
+          studentId: loggedUser.profile.studentId || "",
+          program: loggedUser.profile.program || "",
+          status: "STUDENT",
         })
       );
 
