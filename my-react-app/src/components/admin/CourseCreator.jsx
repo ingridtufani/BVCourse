@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Input from '../ui/Input'; // Assuming Input.jsx is available
+import Button from '../ui/Button'; // Assuming Button.jsx is available
 
 const CourseCreator = ({ onCreate }) => {
     const [formData, setFormData] = useState({
@@ -19,18 +21,56 @@ const CourseCreator = ({ onCreate }) => {
     return (
         <form onSubmit={handleSubmit} className="course-creator-form">
             <div className="form-row">
-                <div className="form-field"><label>Course Name: <input type="text" name="courseName" value={formData.courseName} onChange={handleChange} required /></label></div>
-                <div className="form-field"><label>Term: <input type="text" name="term" value={formData.term} onChange={handleChange} /></label></div>
+                <Input 
+                    id="courseName"
+                    label="Course Name:"
+                    name="courseName" 
+                    value={formData.courseName} 
+                    onChange={handleChange} 
+                    required 
+                    type="text"
+                />
+                <Input 
+                    id="term"
+                    label="Term:"
+                    name="term" 
+                    value={formData.term} 
+                    onChange={handleChange}
+                    type="text" 
+                />
             </div>
             <div className="form-row">
-                <div className="form-field"><label>Start Date: <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} /></label></div>
-                <div className="form-field"><label>End Date: <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} /></label></div>
+                <Input 
+                    id="startDate"
+                    label="Start Date:"
+                    name="startDate" 
+                    value={formData.startDate} 
+                    onChange={handleChange}
+                    type="date"
+                />
+                <Input 
+                    id="endDate"
+                    label="End Date:"
+                    name="endDate" 
+                    value={formData.endDate} 
+                    onChange={handleChange}
+                    type="date"
+                />
             </div>
-            <div className="form-full"><label>Description: <textarea name="description" value={formData.description} onChange={handleChange}></textarea></label></div>
+            {/* Note: Keeping textarea as raw HTML since no custom Textarea component was provided */}
+            <div className="form-full">
+                <label htmlFor="description">Description:</label>
+                <textarea 
+                    id="description"
+                    name="description" 
+                    value={formData.description} 
+                    onChange={handleChange}
+                ></textarea>
+            </div>
             
-            <button type="submit" className="create-course-button">
+            <Button type="submit" variant="btn-primary" className="create-course-button">
                 Create Course
-            </button>
+            </Button>
         </form>
     );
 };

@@ -1,46 +1,72 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import Card from './ui/Card';
-import '../styles/Login.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Card from "./ui/Card";
+import "../styles/Login.css";
 
-const MOCK_USERS = [
-    { username: 'student', password: '123', role: 'student', id: 1 },
-    { username: 'admin', password: '123', role: 'admin', id: 2 },
-];
+// Helper to load registered student and admin data
+const getUsers = () => JSON.parse(localStorage.getItem("users") || "[]");
 
 function LoginForm() {
-    const [userName, setUserName] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    
-    const navigate = useNavigate(); 
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    function handleUsernameChange(e) {
-        setUserName(e.target.value);
+  function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    const users = getUsers();
+    let loggedUser = null;
+
+    // 1. Check for the mock admin user
+    if (userName.trim().toLowerCase() === "admin" && password === "admin123") {
+      loggedUser = { 
+          id: 999, 
+          username: "admin", 
+          role: "admin",
+          profile: { firstName: "Admin", lastName: "User" } 
+      };
+    } else {
+      // 2. Check registered users
+      loggedUser = users.find(
+        (user) => user.username === userName && user.password === password
+      );
     }
 
-    function handlePasswordChange(e) {
-        setPassword(e.target.value);
-    }
+    if (loggedUser) {
+      // --- AUTHENTICATION SUCCESS ---
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("currentUser", JSON.stringify(loggedUser));
+      
+      // FIX: Set the user role explicitly for route protection checks
+      localStorage.setItem("userRole", loggedUser.role); 
 
-   
-    function handleSubmit(e) {
-        e.preventDefault();
-        setError('');
-       
-        const loggedUser = MOCK_USERS.find(
-            user => user.username === userName && user.password === password
+      // Save student profile data (for bvc.profile key used by StudentDashboard)
+      if (loggedUser.role === "student") {
+        localStorage.setItem(
+          "bvc.profile",
+          JSON.stringify({
+            firstName: loggedUser.profile.firstName || "",
+            lastName: loggedUser.profile.lastName || "",
+            studentId: loggedUser.profile.studentId || "",
+            program: loggedUser.profile.program || "",
+            status: "STUDENT",
+            selectedCourses: loggedUser.profile.selectedCourses || [],
+          })
         );
+      }
 
-        if (loggedUser) {
-            localStorage.setItem('userRole', loggedUser.role);
-            localStorage.setItem('isLoggedIn', 'true');
-            
-            navigate(loggedUser.role === 'student' ? '/studentDashboard' : '/adminDashboard');
-        } else {
-            setError('Invalid credentials');
-        }
+      window.dispatchEvent(new Event("auth-changed"));
+
+      // Redirect based on role
+      const dest =
+        loggedUser.role === "student" ? "/studentDashboard" : "/adminDashboard";
+      navigate(dest);
+    } else {
+      setError("Invalid Credentials");
     }
+  }
 
     return (
         <Card className="login-card"> 
@@ -77,5 +103,4 @@ function LoginForm() {
         </Card>
     );
 }
-
 export default LoginForm;
