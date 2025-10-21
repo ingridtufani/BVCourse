@@ -10,6 +10,10 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -70,6 +74,39 @@ function LoginForm() {
     }
   }
 
+  return (
+    <Card className="login-card">
+      <div className="login-container">
+        <h1 className="login-title">LOGIN</h1>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <label className="login-label">USERNAME</label>
+          <input
+            className="login-input"
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            required
+          />
+
+          <label className="login-label">PASSWORD</label>
+          <input
+            className="login-input"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <button type="submit" className="login-button">
+            Login
+          </button>
+        </form>
+      </div>
+    </Card>
+  );
   return (
     <Card className="login-card">
       <div className="login-container">

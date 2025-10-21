@@ -158,6 +158,12 @@ function AdminDashboard() {
       </section>
 
       <hr className="divider" />
+      <section className="dashboard-section">
+        <h2>➕ Create New Course</h2>
+        <CourseCreator onCreate={handleCreateCourse} />
+      </section>
+
+      <hr className="divider" />
 
       <section className="dashboard-section">
         <h2>👥 Registered Students:</h2>
