@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import LogoutButton from "./ui/LogoutButton";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import LogoutButton from "./ui/LogoutButton";
 
 const Navbar = () => {
   const readAuth = () => {
