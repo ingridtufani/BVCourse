@@ -7,6 +7,11 @@ const ContactMessages = ({ messages }) => (
                 <span className="icon-placeholder">✉️</span>
                 <div className="message-details">
                     <p className="message-sender">{msg.sender}</p>
+                    {/* NEW: Display Student ID and Email */}
+                    <p>
+                        ID: **{msg.studentId}** | Email: **{msg.studentEmail}**
+                    </p>
+                    {/* Keep existing info */}
                     <p>Program: {msg.program} | Subject: {msg.subject}</p>
                     <p className="message-date">{msg.date}</p>
                 </div>

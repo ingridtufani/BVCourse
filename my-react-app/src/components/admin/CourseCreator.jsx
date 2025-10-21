@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import Input from '../ui/Input'; // Assuming Input.jsx is available
 import Button from '../ui/Button'; // Assuming Button.jsx is available
 
+// NEW: Helper function to generate the required course code (SD + three random numbers)
+const generateCourseCode = () => {
+    // Generate 3 random digits (000-999) and pad with leading zeros
+    const randomDigits = String(Math.floor(Math.random() * 1000)).padStart(3, '0'); 
+    return `SD${randomDigits}`;
+};
+
 const CourseCreator = ({ onCreate }) => {
     const [formData, setFormData] = useState({
         courseName: '', term: '', startDate: '', endDate: '', description: ''
@@ -14,7 +21,18 @@ const CourseCreator = ({ onCreate }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onCreate(formData);
+        
+        // NEW: 1. Generate the unique code
+        const newCourseCode = generateCourseCode();
+
+        // NEW: 2. Create the final data object including the generated code
+        const finalCourseData = {
+            ...formData,
+            code: newCourseCode, // Add the code here
+        };
+
+        onCreate(finalCourseData);
+        // Clear form after submission
         setFormData({ courseName: '', term: '', startDate: '', endDate: '', description: '' });
     };
 

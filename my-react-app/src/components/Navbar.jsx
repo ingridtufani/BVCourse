@@ -1,5 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import LogoutButton from "./ui/LogoutButton";
 
 const Navbar = () => {
   const readAuth = () => {
@@ -39,7 +40,7 @@ const Navbar = () => {
           <span>🎓</span>
           Bow Registration
         </Link>
-        
+
         <div className="nav-links">
           <Link to="/" className="nav-link">
             Home
