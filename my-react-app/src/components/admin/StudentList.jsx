@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../ui/Button'; // Assuming ui/Button is the path
 
 const StudentList = ({ students }) => (
     <div className="student-list">
@@ -10,7 +11,7 @@ const StudentList = ({ students }) => (
                     <p>ID: {student.id} | Program: {student.program} | Email: {student.email}</p>
                 </div>
                 <span className={`student-status ${student.status.toLowerCase()}`}>{student.status}</span>
-                <button className="view-details-button">View Details</button>
+                <Button variant="btn-ghost" className="view-details-button">View Details</Button>
             </div>
         ))}
     </div>

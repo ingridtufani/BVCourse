@@ -2,12 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "./ui/Card";
 import "../styles/Login.css";
-import LogoutButton from "./ui/LogoutButton";
-
-// const MOCK_USERS = [
-//     { username: 'student', password: '123', role: 'student', id: 1 },
-//     { username: 'admin', password: '123', role: 'admin', id: 2 },
-// ];
 
 const getUsers = () => JSON.parse(localStorage.getItem("users") || "[]");
 
@@ -17,81 +11,54 @@ function LoginForm() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  //   function handleUsernameChange(e) {
-  //     setUserName(e.target.value);
-  //   }
-
-  //   function handlePasswordChange(e) {
-  //     setPassword(e.target.value);
-  //   }
-
   function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    // const loggedUser = MOCK_USERS.find(
-    //   (user) => user.username === userName && user.password === password
-    // );
-
     const users = getUsers();
+    let loggedUser = null;
 
+    // Check for the mock admin user
     if (userName.trim().toLowerCase() === "admin" && password === "admin123") {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify({
-          id: "admin-001",
+      loggedUser = { 
+          id: 999, 
+          username: "admin", 
           role: "admin",
-          username: "admin",
-          profile: { firstName: "Administrator" },
-        })
+          profile: { firstName: "Admin", lastName: "User" } 
+      };
+    } else {
+      // Check registered users
+      loggedUser = users.find(
+        (user) => user.username === userName && user.password === password
       );
-
-      localStorage.setItem(
-        "bvc.profile",
-        JSON.stringify({
-          firstName: "Administrator",
-          lastName: "",
-          studentId: "ADMIN",
-          program: "",
-          status: "ADMINISTRATOR",
-        })
-      );
-
-      window.dispatchEvent(new Event("auth-changed"));
-      navigate("/adminDashboard");
-      return;
     }
 
-    const loggedUser = users.find(
-      (u) =>
-        u.username.trim().toLowerCase() === userName.trim().toLowerCase() &&
-        u.password === password
-    );
-
     if (loggedUser) {
-      //   localStorage.setItem("userRole", loggedUser.role);
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify({
-          id: loggedUser.id,
-          role: loggedUser.role,
-          username: loggedUser.username,
-          profile: loggedUser.profile,
-        })
-      );
-
-      localStorage.setItem(
-        "bvc.profile",
-        JSON.stringify({
-          firstName: loggedUser.profile.firstName || "",
-          lastName: loggedUser.profile.lastName || "",
-          studentId: loggedUser.profile.studentId || "",
-          program: loggedUser.profile.program || "",
-          status: "STUDENT",
-        })
-      );
+      localStorage.setItem("currentUser", JSON.stringify(loggedUser));
+      localStorage.setItem("userRole", loggedUser.role);
+      
+      // Save student profile data for bvc.profile key used by StudentDashboard/Profile
+      if (loggedUser.role === "student") {
+        localStorage.setItem(
+          "bvc.profile",
+          JSON.stringify({
+            // Existing fields
+            firstName: loggedUser.profile.firstName || "",
+            lastName: loggedUser.profile.lastName || "",
+            studentId: loggedUser.profile.studentId || "",
+            program: loggedUser.profile.program || "",
+            status: "STUDENT",
+            selectedCourses: loggedUser.profile.selectedCourses || [],
+            // --- FIX: ADD MISSING PROFILE FIELDS ---
+            email: loggedUser.profile.email || "",
+            phone: loggedUser.profile.phone || "",
+            birthday: loggedUser.profile.birthday || "",
+            department: loggedUser.profile.department || "",
+            // --- END FIX ---
+          })
+        );
+      }
 
       window.dispatchEvent(new Event("auth-changed"));
 
@@ -136,6 +103,38 @@ function LoginForm() {
       </div>
     </Card>
   );
-}
+  return (
+    <Card className="login-card">
+      <div className="login-container">
+        <h1 className="login-title">LOGIN</h1>
 
+        {error && <p className="error-message">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <label className="login-label">USERNAME</label>
+          <input
+            className="login-input"
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            required
+          />
+
+          <label className="login-label">PASSWORD</label>
+          <input
+            className="login-input"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <button type="submit" className="login-button">
+            Login
+          </button>
+        </form>
+      </div>
+    </Card>
+  );
+}
 export default LoginForm;

@@ -52,25 +52,14 @@ const ContactMessages = ({ messages = [], onRefresh }) => {
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span className="icon-placeholder">✉️</span>
                 <div className="message-details">
-                  <p
-                    className="message-sender"
-                    style={{ margin: 0, fontWeight: 600 }}
-                  >
-                    {msg?.student?.name || "Student"} ({msg?.student?.id || "-"}
-                    )
-                  </p>
-
-                  <p style={{ margin: 0, fontSize: 13 }}>
-                    Program: {msg?.student?.program || "-"}{" "}
-                    <strong>{msg.subject}</strong>
-                  </p>
-
-                  <p
-                    className="message-date"
-                    style={{ fontSize: 12, color: "#888" }}
-                  >
-                    {new Date(msg.createdAt).toLocaleString()}
-                  </p>
+                    <p className="message-sender">{msg.sender}</p>
+                    {/* NEW: Display Student ID and Email */}
+                    <p>
+                        ID: **{msg.studentId}** | Email: **{msg.studentEmail}**
+                    </p>
+                    {/* Keep existing info */}
+                    <p>Program: {msg.program} | Subject: {msg.subject}</p>
+                    <p className="message-date">{msg.date}</p>
                 </div>
               </div>
 

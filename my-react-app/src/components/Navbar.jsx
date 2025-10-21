@@ -8,7 +8,9 @@ const Navbar = () => {
     const currentUser = raw ? JSON.parse(raw) : null;
     const isLoggedIn =
       localStorage.getItem("isLoggedIn") === "true" && !!currentUser;
-    return { isLoggedIn, currentUser };
+    // Also read the userRole here
+    const userRole = localStorage.getItem("userRole"); 
+    return { isLoggedIn, currentUser, userRole };
   };
 
   const [auth, setAuth] = useState(readAuth());
@@ -23,7 +25,13 @@ const Navbar = () => {
     };
   }, []);
 
-  const { isLoggedIn, currentUser } = auth;
+  const { isLoggedIn, currentUser, userRole } = auth;
+  
+  // Determine the correct dashboard path dynamically
+  const dashboardPath = userRole === 'admin' ? '/adminDashboard' : '/studentDashboard';
+  
+  // Get the display name
+  const displayName = currentUser?.profile?.firstName || currentUser?.username;
 
   return (
     <nav className="navbar">
@@ -32,6 +40,7 @@ const Navbar = () => {
           <span>🎓</span>
           Bow Registration
         </Link>
+
 
         <div className="nav-links">
           <Link to="/" className="nav-link">
@@ -50,12 +59,18 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <span className="nav-user">
+              {/* === START CHANGE: Replace span with Link for dashboard navigation === */}
+              <Link 
+                to={dashboardPath} 
+                className="nav-user"
+                style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+              >
                 Welcome,{" "}
                 <strong>
-                  {currentUser?.profile?.firstName || currentUser?.username}
+                  {displayName}
                 </strong>
-              </span>
+              </Link>
+              {/* === END CHANGE === */}
               <LogoutButton />
             </>
           )}

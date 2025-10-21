@@ -1,4 +1,13 @@
 import React, { useState } from 'react';
+import Input from '../ui/Input'; // Assuming Input.jsx is available
+import Button from '../ui/Button'; // Assuming Button.jsx is available
+
+// NEW: Helper function to generate the required course code (SD + three random numbers)
+const generateCourseCode = () => {
+    // Generate 3 random digits (000-999) and pad with leading zeros
+    const randomDigits = String(Math.floor(Math.random() * 1000)).padStart(3, '0'); 
+    return `SD${randomDigits}`;
+};
 
 const CourseCreator = ({ onCreate }) => {
     const [formData, setFormData] = useState({
@@ -12,25 +21,74 @@ const CourseCreator = ({ onCreate }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onCreate(formData);
+        
+        // NEW: 1. Generate the unique code
+        const newCourseCode = generateCourseCode();
+
+        // NEW: 2. Create the final data object including the generated code
+        const finalCourseData = {
+            ...formData,
+            code: newCourseCode, // Add the code here
+        };
+
+        onCreate(finalCourseData);
+        // Clear form after submission
         setFormData({ courseName: '', term: '', startDate: '', endDate: '', description: '' });
     };
 
     return (
         <form onSubmit={handleSubmit} className="course-creator-form">
             <div className="form-row">
-                <div className="form-field"><label>Course Name: <input type="text" name="courseName" value={formData.courseName} onChange={handleChange} required /></label></div>
-                <div className="form-field"><label>Term: <input type="text" name="term" value={formData.term} onChange={handleChange} /></label></div>
+                <Input 
+                    id="courseName"
+                    label="Course Name:"
+                    name="courseName" 
+                    value={formData.courseName} 
+                    onChange={handleChange} 
+                    required 
+                    type="text"
+                />
+                <Input 
+                    id="term"
+                    label="Term:"
+                    name="term" 
+                    value={formData.term} 
+                    onChange={handleChange}
+                    type="text" 
+                />
             </div>
             <div className="form-row">
-                <div className="form-field"><label>Start Date: <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} /></label></div>
-                <div className="form-field"><label>End Date: <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} /></label></div>
+                <Input 
+                    id="startDate"
+                    label="Start Date:"
+                    name="startDate" 
+                    value={formData.startDate} 
+                    onChange={handleChange}
+                    type="date"
+                />
+                <Input 
+                    id="endDate"
+                    label="End Date:"
+                    name="endDate" 
+                    value={formData.endDate} 
+                    onChange={handleChange}
+                    type="date"
+                />
             </div>
-            <div className="form-full"><label>Description: <textarea name="description" value={formData.description} onChange={handleChange}></textarea></label></div>
+            {/* Note: Keeping textarea as raw HTML since no custom Textarea component was provided */}
+            <div className="form-full">
+                <label htmlFor="description">Description:</label>
+                <textarea 
+                    id="description"
+                    name="description" 
+                    value={formData.description} 
+                    onChange={handleChange}
+                ></textarea>
+            </div>
             
-            <button type="submit" className="create-course-button">
+            <Button type="submit" variant="btn-primary" className="create-course-button">
                 Create Course
-            </button>
+            </Button>
         </form>
     );
 };

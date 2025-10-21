@@ -2,21 +2,22 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
+import Select from "./ui/Select"; 
 import { courseData, programData } from "../data/demoData";
-import ContactMessages from "./admin/ContactMessages";
+import ContactForm from "./ContactForm"; 
 import { useNavigate } from "react-router-dom";
 
 const LS_KEY = "bvc.profile";
 
 /* Minimal helpers */
-
 function loadProfile() {
   const fallback = {
-    firstName: "Ingrid",
-    lastName: "Tufani",
-    studentId: "SD12345",
-    program: "SD-DIP",
+    firstName: "User",
+    lastName: "Name",
+    studentId: "00000",
+    program: "N/A",
     status: "STUDENT",
+    selectedCourses: [], 
   };
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -25,6 +26,13 @@ function loadProfile() {
     return fallback;
   }
 }
+
+function saveProfile(data) {
+    try {
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+    } catch {}
+}
+
 
 function formatProgram(code) {
   const p = programData.find((x) => x.code === code);
@@ -40,315 +48,207 @@ const TERM_LABELS = {
   summer: "Summer",
   fall: "Fall",
 };
-const TERM_ORDER = ["*", "winter", "spring", "summer", "fall"];
-const normalizeTerm = (t = "") =>
-  t
-    .toLowerCase()
-    .replace(/\s*\(.*?\)/g, "")
-    .trim();
+const TERM_OPTIONS = Object.keys(TERM_LABELS).map((value) => ({
+  value,
+  label: TERM_LABELS[value],
+}));
 
-export default function StudentDashboard() {
+// Helper function to get the current user's role and login status
+const getAuthStatus = () => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const userRole = localStorage.getItem("userRole"); 
+    return { isLoggedIn, userRole };
+};
+
+
+function StudentDashboard() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(loadProfile());
-  const [termKey, setTermKey] = useState("");
-  const [registered, setRegistered] = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [query, setQuery] = useState("");
+  const { isLoggedIn, userRole } = getAuthStatus();
 
-  useEffect(() => setProfile(loadProfile()), []);
+  // --- ACCESS PROTECTION LOGIC ---
+  if (!isLoggedIn || userRole !== 'student') {
+    // If not logged in, redirect to login after rendering the message
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate("/login", { replace: true });
+        }
+    }, [isLoggedIn, navigate]);
 
-  const fullName = useMemo(
-    () => `${profile.firstName || ""} ${profile.lastName || ""}`.trim(),
-    [profile.firstName, profile.lastName]
+    // Render the access denied message
+    return (
+        <div style={{ padding: '50px', textAlign: 'center' }}>
+            <h1>🚫 Access Denied</h1>
+            <p>You must be logged in as a **Student** to view this page.</p>
+            <button onClick={() => navigate('/login')}>Go to Login</button>
+        </div>
+    );
+  }
+  // --- END ACCESS PROTECTION LOGIC ---
+
+  const profile = useMemo(() => loadProfile(), []);
+  const [selected, setSelected] = useState(profile.selectedCourses || []);
+  const [termFilter, setTermFilter] = useState("*");
+  const [submitMessage, setSubmitMessage] = useState(null);
+
+  const availableCourses = useMemo(() => {
+    return courseData.filter((c) => {
+      // 1. Filter by term
+      const termMatch =
+        termFilter === "*" || (c.term || "").toLowerCase() === termFilter;
+      // 2. Exclude already selected courses
+      const isSelected = selected.some((sc) => sc.code === c.code);
+
+      return termMatch && !isSelected;
+    });
+  }, [selected, termFilter]);
+
+  const addCourse = useCallback(
+    (courseCode) => {
+      const courseToAdd = courseData.find((c) => c.code === courseCode);
+      if (courseToAdd) {
+        setSelected((prev) => [...prev, courseToAdd]);
+      }
+    },
+    [setSelected]
   );
 
-  const availableTerms = useMemo(() => {
-    const keys = new Set(courseData.map((c) => normalizeTerm(c.term)));
-    return ["*", ...Array.from(keys)].sort(
-      (a, b) => TERM_ORDER.indexOf(a) - TERM_ORDER.indexOf(b)
-    );
-  }, []);
+  const removeCourse = useCallback(
+    (courseCode) => {
+      setSelected((prev) => prev.filter((c) => c.code !== courseCode));
+    },
+    [setSelected]
+  );
 
-  const loadByTermKey = useCallback((key) => {
-    if (!key) return setRegistered([]);
-    const list =
-      key === "*"
-        ? [...courseData]
-        : courseData.filter((c) => normalizeTerm(c.term) === key);
+  const handleSubmit = () => {
+    // 1. Update the profile in local storage
+    const newProfile = { ...profile, selectedCourses: selected };
+    saveProfile(newProfile);
+    
+    // 2. Display success message
+    setSubmitMessage("✅ Courses submitted successfully and saved!");
 
-    list.sort((a, b) => {
-      const ta = TERM_ORDER.indexOf(normalizeTerm(a.term));
-      const tb = TERM_ORDER.indexOf(normalizeTerm(b.term));
-      return ta !== tb ? ta - tb : a.code.localeCompare(b.code);
-    });
-    setRegistered(list);
-  }, []);
-
-  const onChangeTerm = (e) => {
-    const key = e.target.value;
-    setTermKey(key);
-    setQuery("");
-    setSelected([]);
-    loadByTermKey(key);
+    // 3. Clear the message after a few seconds
+    setTimeout(() => setSubmitMessage(null), 3000);
   };
-
-  const visibleRegistered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return registered;
-    return registered.filter(
-      (c) =>
-        c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
-    );
-  }, [registered, query]);
-
-  const addCourse = (course) =>
-    setSelected((prev) =>
-      prev.find((c) => c.code === course.code) ? prev : [...prev, course]
-    );
-
-  const removeCourse = (code) =>
-    setSelected((prev) => prev.filter((c) => c.code !== code));
-
-  // placeholders
-  const handleContactHistory = () => alert("Contact History (placeholder)");
-  const handleViewMessages = () => alert("View Messages (placeholder)");
-  const handleContactAdmin = () => navigate("/contact");
-  const handleSubmit = () => alert("Submit selected courses (placeholder)");
-
-  const isPlaceholder = termKey === "";
+  
+  // Re-save selected courses whenever the list changes (for persistence)
+  useEffect(() => {
+    const newProfile = { ...profile, selectedCourses: selected };
+    saveProfile(newProfile);
+  }, [selected, profile]);
+  
 
   return (
-    <div className="container" style={{ paddingTop: 24, paddingBottom: 24 }}>
-      <Card className="p-2 fade-in">
-        {/* Title */}
-        <div className="flex items-center" style={{ marginBottom: 16, gap: 8 }}>
-          <span role="img" aria-label="student">
-            👩‍🎓
-          </span>
-          <h2
-            className="page-title"
-            style={{ color: "var(--primary-color)", margin: 0 }}
+    <div className="student-dashboard">
+      <Card
+        className="profile-summary"
+        style={{ padding: "16px 24px", marginBottom: 20 }}
+      >
+        <div
+          className="flex"
+          style={{ justifyContent: "space-between", alignItems: "center" }}
+        >
+          <div className="profile-info">
+            <h1>
+              Welcome, {profile.firstName} {profile.lastName}
+            </h1>
+            <p className="muted">ID: {profile.studentId}</p>
+            <p className="muted">
+              Program: <strong>{formatProgram(profile.program)}</strong>
+            </p>
+          </div>
+          <Button
+            variant="btn-outline"
+            onClick={() => navigate("/profile")}
           >
-            STUDENT DASHBOARD
-          </h2>
+            Edit Profile
+          </Button>
+        </div>
+      </Card>
+
+      {/* Course Registration Section */}
+      <Card style={{ padding: 24, marginBottom: 20 }}>
+        <h2 style={{ marginBottom: 20 }}>📚 Course Registration</h2>
+
+        {/* Filters */}
+        <div
+          className="flex"
+          style={{
+            justifyContent: "flex-start",
+            gap: 20,
+            marginBottom: 20,
+          }}
+        >
+          <Select
+            id="term-filter"
+            label="Filter by Term"
+            value={termFilter}
+            onChange={(e) => setTermFilter(e.target.value)}
+            options={TERM_OPTIONS}
+          />
         </div>
 
-        {/* Student Info */}
-        <div style={{ marginBottom: 12 }}>
+        {/* Available Courses */}
+        <section>
+          <h3 style={{ borderBottom: "1px solid #eee", paddingBottom: 5 }}>
+            Available Courses ({availableCourses.length})
+          </h3>
           <div
-            style={{
-              display: "flex",
-              gap: 72,
-              alignItems: "flex-start",
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ flex: "1 1 280px", minWidth: 280 }}>
-              <small className="form-label">STUDENT ID:</small>
-              <div>{profile.studentId || "—"}</div>
-            </div>
-            <div style={{ flex: "1 1 280px", minWidth: 280 }}>
-              <small className="form-label">STATUS:</small>
-              <div>{profile.status || "STUDENT"}</div>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 12 }}>
-            <small className="form-label">Name:</small>
-            <div>{fullName || "—"}</div>
-          </div>
-
-          <div style={{ marginTop: 10 }}>
-            <small className="form-label">Program:</small>
-            <div>{formatProgram(profile.program)}</div>
-          </div>
-        </div>
-
-        {/* My Messages */}
-        <section style={{ marginTop: 12 }}>
-          <div
-            className="flex items-center"
-            style={{ gap: 8, marginBottom: 8 }}
-          >
-            <span role="img" aria-label="messages">
-              💬
-            </span>
-            <h3
-              className="section-title"
-              style={{ color: "var(--primary-color)", margin: 0 }}
-            >
-              My Messages
-            </h3>
-          </div>
-          <div
-            className="input"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              padding: 8,
-            }}
-          >
-            <Button variant="btn-outline" onClick={handleContactHistory}>
-              Contact History
-            </Button>
-            <Button variant="btn-light" onClick={handleViewMessages}>
-              🔔 View Messages
-            </Button>
-            <Button variant="btn-primary" onClick={handleContactAdmin}>
-              📨 Contact Admin
-            </Button>
-          </div>
-        </section>
-
-        {/* Select a Term */}
-        <section style={{ marginTop: 20 }}>
-          <div
-            className="flex items-center"
-            style={{ gap: 8, marginBottom: 8 }}
-          >
-            <span role="img" aria-label="book">
-              📖
-            </span>
-            <h3
-              className="section-title"
-              style={{ color: "var(--primary-color)", margin: 0 }}
-            >
-              Select a Term
-            </h3>
-          </div>
-
-          <small className="form-label">Term</small>
-          <div className="form-field">
-            <div className="input">
-              <select
-                value={termKey}
-                onChange={onChangeTerm}
-                style={{
-                  width: "100%",
-                  background: "transparent",
-                  outline: "none",
-                  border: "none",
-                  color: isPlaceholder ? "var(--text-light)" : "inherit",
-                }}
-              >
-                {isPlaceholder && (
-                  <option value="" disabled>
-                    Select a Term
-                  </option>
-                )}
-                {availableTerms.map((k) => (
-                  <option key={k} value={k}>
-                    {TERM_LABELS[k] || k}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </section>
-
-        {/* Registered Courses */}
-        <section style={{ marginTop: 16 }}>
-          <div
-            className="flex items-center"
-            style={{ gap: 8, marginBottom: 8 }}
-          >
-            <span role="img" aria-label="inbox">
-              📥
-            </span>
-            <h3
-              className="section-title"
-              style={{ color: "var(--primary-color)", margin: 0 }}
-            >
-              Registered Courses
-            </h3>
-          </div>
-
-          <small className="form-label">Search Courses</small>
-          <div className="form-field">
-            <div className="input">
-              <input
-                placeholder="Search by name or code"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                disabled={!termKey}
-                style={{
-                  width: "100%",
-                  background: "transparent",
-                  outline: "none",
-                  border: "none",
-                }}
-              />
-            </div>
-          </div>
-
-          <div
+            className="course-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
               gap: 16,
+              marginTop: 16,
             }}
           >
-            {visibleRegistered.map((c) => (
-              <Card key={c.code} className="p-2">
-                <strong style={{ color: "var(--primary-color)" }}>
-                  {c.name}
-                </strong>
-                <div className="muted" style={{ marginTop: 6 }}>
-                  Code: {c.code}
-                </div>
-                <div className="muted">Term: {c.term}</div>
-                <div className="muted">
-                  Period: {c.startDate} → {c.endDate}
-                </div>
-                {c.description && (
-                  <div className="muted" style={{ marginTop: 6 }}>
-                    {c.description}
-                  </div>
-                )}
-                <div
-                  className="flex"
-                  style={{ justifyContent: "flex-start", marginTop: 10 }}
-                >
-                  <Button variant="btn-light" onClick={() => addCourse(c)}>
-                    ＋ Add
-                  </Button>
-                </div>
-              </Card>
-            ))}
-            {termKey && !visibleRegistered.length && (
-              <div className="muted">
-                No courses found for the selected term.
-              </div>
+            {availableCourses.length > 0 ? (
+                availableCourses.map((c) => (
+                    <Card key={c.code} className="p-2">
+                      <strong style={{ color: "var(--text-color)" }}>
+                        {c.name}
+                      </strong>
+                      <div className="muted" style={{ marginTop: 6 }}>
+                        Code: {c.code}
+                      </div>
+                      <div className="muted">Term: {TERM_LABELS[c.term.toLowerCase()]}</div>
+                      <div className="muted">
+                        Period: {c.startDate} → {c.endDate}
+                      </div>
+                      <div
+                        className="flex"
+                        style={{ justifyContent: "flex-end", marginTop: 10 }}
+                      >
+                        <Button variant="btn-primary" onClick={() => addCourse(c.code)}>
+                          + Add Course
+                        </Button>
+                      </div>
+                    </Card>
+                  ))
+            ) : (
+                <p className="muted" style={{ gridColumn: '1 / -1' }}>No available courses for this term.</p>
             )}
           </div>
         </section>
 
         {/* Selected Courses */}
-        <section style={{ marginTop: 20 }}>
-          <div
-            className="flex items-center"
-            style={{ gap: 8, marginBottom: 8 }}
-          >
-            <span role="img" aria-label="cap">
-              🎓
-            </span>
-            <h3
-              className="section-title"
-              style={{ color: "var(--primary-color)", margin: 0 }}
-            >
-              Selected Courses
-            </h3>
-          </div>
+        <section style={{ marginTop: 30 }}>
+          <h3 style={{ borderBottom: "1px solid #eee", paddingBottom: 5 }}>
+            My Registration Cart ({selected.length})
+          </h3>
 
-          {!selected.length ? (
-            <p className="muted">No courses selected.</p>
+          {selected.length === 0 ? (
+            <p className="muted" style={{ marginTop: 16 }}>
+              No courses selected yet.
+            </p>
           ) : (
             <div
+              className="course-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 gap: 16,
+                marginTop: 16,
               }}
             >
               {selected.map((c) => (
@@ -359,7 +259,7 @@ export default function StudentDashboard() {
                   <div className="muted" style={{ marginTop: 6 }}>
                     Code: {c.code}
                   </div>
-                  <div className="muted">Term: {c.term}</div>
+                  <div className="muted">Term: {TERM_LABELS[c.term.toLowerCase()]}</div>
                   <div className="muted">
                     Period: {c.startDate} → {c.endDate}
                   </div>
@@ -380,19 +280,30 @@ export default function StudentDashboard() {
           )}
         </section>
 
+        {/* Submit Action */}
         <div
           className="flex"
-          style={{ justifyContent: "center", marginTop: 24 }}
+          style={{ justifyContent: "center", marginTop: 24, flexDirection: 'column', alignItems: 'center' }}
         >
+          {submitMessage && (
+            <p style={{ color: 'green', marginBottom: 12, fontWeight: 500 }}>{submitMessage}</p>
+          )}
           <Button
             variant="btn-primary"
             onClick={handleSubmit}
             disabled={!selected.length}
           >
-            Submit
+            Submit Registration
           </Button>
         </div>
+      </Card>
+
+      {/* Contact Form Section */}
+      <Card style={{ padding: 24, marginBottom: 20 }}>
+        <h2 style={{ marginBottom: 20 }}>✉️ Contact the Department</h2>
+        <ContactForm />
       </Card>
     </div>
   );
 }
+export default StudentDashboard;
